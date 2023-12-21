@@ -8,6 +8,7 @@ User Not found Error,
 FindUserby ID (id int, users []models.User) (models.User, error)
 Get ID from Request (formValue string, ctx *gin.Context) (int, error)
 
+Other functions:
 sendKafkaMessage(producer sarama.SyncProducer,
 	users []models.User, ctx *gin.Context, fromID, toID int)
 
@@ -16,20 +17,27 @@ sendMessageHandler(producer sarama.SyncProducer,
 
 setupProducer() (sarama.SyncProducer, error)
 
+Call Flow:
+Main -> Setup Producers:
+Main -> SendMessageHandler ->sendkafkaMessage
+
+Read it from main.
+
 
 Within the setupProducer() function:
 
 * config := sarama.NewConfig(): Initializes a new default configuration for Kafka. Think of it as setting up the parameters before connecting to the broker.
 
-* config.Producer.Return.Successes = true: Ensures that the producer receives an acknowledgment once the message is successfully stored in the "notifications" topic.
+* config.Producer.Return.Successes = true: Ensures that the producer receives an acknowledgment 
+once the message is successfully stored in the "notifications" topic.
 
 * producer, err := sarama.NewSyncProducer(…): Initializes a synchronous Kafka producer that connects to the Kafka broker running at localhost:9092.
 
 Inside the sendKafkaMessage() function:
 
-This function starts by retrieving the message from the context and then attempts to find both the sender and the recipient using their IDs.
-notification := models.Notification{…}: Initializes a Notification struct that encapsulates information about the sender, the recipient, and the actual message.
-msg := &sarama.ProducerMessage{…}: Constructs a ProducerMessage for the "notifications" topic, setting the recipient’s ID as the Key and the message content, which is the serialized form of the Notification as the Value.
+* This function starts by retrieving the message from the context and then attempts to find both the sender and the recipient using their IDs.
+*notification := models.Notification{…}: Initializes a Notification struct that encapsulates information about the sender, the recipient, and the actual message.
+*msg := &sarama.ProducerMessage{…}: Constructs a ProducerMessage for the "notifications" topic, setting the recipient’s ID as the Key and the message content, which is the serialized form of the Notification as the Value.
 producer.SendMessage(msg): Sends the constructed message to the "notifications" topic.
 
 In the sendMessageHandler() function:

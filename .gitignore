@@ -21,3 +21,4 @@
 go.work
 kafka-notify/docker-compose.yml.bak
 kafka-notify/go.sum
+*.bak
